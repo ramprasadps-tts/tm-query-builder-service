@@ -19,7 +19,11 @@ public class DbConnectionRequestPOJO {
 	private String databasePassword;
 	@NotBlank(message = "Enter Database Name")
 	private String databaseName;
-
+    private String schemaName;
+    public String getSchemaName()
+    {
+    	return schemaName;
+    }
 	public int getConnectionPort() {
 		return connectionPort;
 	}
@@ -51,6 +55,10 @@ public class DbConnectionRequestPOJO {
 	public void setConnectionPort(int connectionPort) {
 		this.connectionPort = connectionPort;
 	}
+	public void setSchemaName(String schemaName) {
+		this.schemaName = schemaName;
+	}
+
 
 	public void setConnectionDriver(String connectionDriver) {
 		this.connectionDriver = connectionDriver;

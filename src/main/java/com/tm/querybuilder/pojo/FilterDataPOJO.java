@@ -5,7 +5,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 public class FilterDataPOJO {
-
 	@NotBlank(message = "Enter the tableName")
 	private String tableName;
 
@@ -88,7 +87,6 @@ public class FilterDataPOJO {
 	public void setJoinData(JoinsPOJO joinData) {
 		this.joinData = joinData;
 	}
-
 	public String getTableName() {
 		return tableName;
 	}
@@ -106,3 +104,4 @@ public class FilterDataPOJO {
 	}
 
 }
+

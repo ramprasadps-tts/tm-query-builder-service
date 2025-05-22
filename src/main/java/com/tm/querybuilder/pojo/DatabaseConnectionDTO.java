@@ -10,13 +10,22 @@ public class DatabaseConnectionDTO {
 	private String connectionUser;
 	private String connectionPassword;
 	private String connectionDb;
+	private String connectionSchemaname;
 
+	public String getConnectionSchemaname()
+	{
+		return connectionSchemaname;
+	}
 	public String getConnectionId() {
 		return connectionId;
 	}
 
 	public void setConnectionId(String connectionId) {
 		this.connectionId = connectionId;
+	}
+	public void setConnectionSchemaname(String connectionSchemaname)
+	{
+		this.connectionSchemaname=connectionSchemaname;
 	}
 
 	public int getConnectionPort() {

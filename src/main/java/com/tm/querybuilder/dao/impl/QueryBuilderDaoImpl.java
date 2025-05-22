@@ -59,22 +59,33 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public Boolean isSchemaExist(String schemaString, DatabaseConnectionDTO databaseConnectionDTO) {
-		LOGGER.info("Is Schema Exist Dao layer.");
-		boolean isSchemaExist = false;
-		try {
-			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
-			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
-			// Build a query and store in string.
-			String existsSqlString = QueryConstants.IS_SCHEMA_EXIST;
-			paramsObj.addValue(MessageConstants.SCHEMA_NAME, schemaString);
-			isSchemaExist = namedParameterJdbcTemplate.queryForObject(existsSqlString, paramsObj, Boolean.class);
-		} catch (DataAccessException exception) {
-			LOGGER.error("An error occurred while checking if the schema exists", exception);
-			throw new DataAccessResourceFailureException("An error occurred while checking if the schema exists");
-		}
-		LOGGER.debug("Schema Exist dao method data:{}", isSchemaExist);
-		return isSchemaExist;
+	    LOGGER.info("Is Schema Exist Dao layer.");
+	    boolean isSchemaExist = false;
+	    try {
+	        MapSqlParameterSource paramsObj = new MapSqlParameterSource();
+	        NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
+	        LOGGER.info("Checking schema '{}' in DB with driver '{}'", schemaString, databaseConnectionDTO.getConnectionDriver());
+	        String existsSqlString;
+	        String p=MessageConstants.POSTGRES;
+	        if (p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver())) {
+	            existsSqlString = QueryConstants.IS_SCHEMA_EXIST_POSTGRES;
+	        } else {
+	            existsSqlString = QueryConstants.IS_SCHEMA_EXIST;
+	        }
+
+	        paramsObj.addValue(MessageConstants.SCHEMA_NAME, schemaString);
+	        Boolean result = namedParameterJdbcTemplate.queryForObject(
+	        	    existsSqlString, paramsObj, Boolean.class);
+	        	LOGGER.info("Schema exists result from DB: {}", result);
+	        	isSchemaExist = Boolean.TRUE.equals(result);
+	    } catch (DataAccessException exception) {
+	        LOGGER.error("An error occurred while checking if the schema exists", exception);
+	        throw new DataAccessResourceFailureException("An error occurred while checking if the schema exists", exception);
+	    }
+	    LOGGER.debug("Schema Exist dao method data: {}", isSchemaExist);
+	    return isSchemaExist;
 	}
+
 
 	/**
 	 * In this method it validate the table in the schema
@@ -91,7 +102,6 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		try {
 			MapSqlParameterSource parametersObj = new MapSqlParameterSource();
 			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
-			// Build a query and store in string.
 			String queryString = QueryConstants.IS_VALID_TABLE;
 			parametersObj.addValue(MessageConstants.TABLE_NAME, tableList);
 			parametersObj.addValue(MessageConstants.SCHEMA_NAME, schemaString);
@@ -152,7 +162,12 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		try {
 			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
 			// Query to get column names and data types for each table
-			String sqlString = QueryConstants.SCHEMA_DETAIL;
+			String sqlString;
+			if ("postgresql".equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver())) {
+				sqlString = QueryConstants.SCHEMA_DETAILS_POSTGRES;
+			} else {
+				sqlString = QueryConstants.SCHEMA_DETAIL;
+			}
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 			paramsObj.addValue(MessageConstants.SCHEMA_NAME, schemaString);
 			columnList = namedParameterJdbcTemplate.query(sqlString, paramsObj,
@@ -253,6 +268,16 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		LOGGER.debug("get DataType dao: {}", fetchTableDetails);
 		return fetchTableDetails;
 	}
+	private String buildJdbcUrl(String driver, String host, int port, String dbName) {
+	    if ("mysql".equalsIgnoreCase(driver)) {
+	        return "jdbc:mysql://" + host + ":" + port + "/" + dbName;
+	    } else if ("postgres".equalsIgnoreCase(driver) || "postgresql".equalsIgnoreCase(driver)) {
+	        return "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
+	    } else {
+	        throw new IllegalArgumentException("Unsupported driver: " + driver);
+	    }
+	}
+
 
 	/**
 	 * This method is used to register the database details in query builder db and
@@ -262,9 +287,23 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	public String getDatabaseConnection(DbConnectionRequestPOJO dbConnectionRequestPojo) {
 		String response = null;
 		try {
-			DataSource dynamicDataSource = new DynamicDataSource(jdbcUrl, user, password);
-			NamedParameterJdbcTemplate parameterJdbcTemplate = new NamedParameterJdbcTemplate(dynamicDataSource);
-			String sql = "INSERT INTO db_connection(connection_id,connection_host,connection_db,connection_port,connection_driver,connection_user,connection_password) VALUES(:id,:host,:database,:port,:driver,:user,:password)";
+			//CONNECTION TO THE DATABASE
+			String jdbcUrl1 = buildJdbcUrl(
+				    dbConnectionRequestPojo.getConnectionDriver(),
+				    dbConnectionRequestPojo.getConnectionHost(),
+				    dbConnectionRequestPojo.getConnectionPort(),
+				    dbConnectionRequestPojo.getDatabaseName()
+				);
+				DataSource dynamicDataSource= new DynamicDataSource(
+				    jdbcUrl1,
+				    dbConnectionRequestPojo.getDatabaseUser(),
+				    dbConnectionRequestPojo.getDatabasePassword()
+				);
+				//CONNECTON TO LOCAL MYSQL DATABASE
+				DataSource dynamicDataSourceSql=new DynamicDataSource(jdbcUrl,user,password);
+
+			NamedParameterJdbcTemplate parameterJdbcTemplate = new NamedParameterJdbcTemplate(dynamicDataSourceSql);
+			String sql = "INSERT INTO db_connection(connection_id,connection_host,connection_db,connection_port,connection_driver,connection_user,connection_password,connection_schemaname) VALUES(:id,:host,:database,:port,:driver,:user,:password,:schemaname)";
 			UUID uuid = UUID.randomUUID();
 			MapSqlParameterSource params = new MapSqlParameterSource().addValue("id", uuid.toString())
 					.addValue("host", dbConnectionRequestPojo.getConnectionHost())
@@ -272,7 +311,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 					.addValue("port", dbConnectionRequestPojo.getConnectionPort())
 					.addValue("driver", dbConnectionRequestPojo.getConnectionDriver())
 					.addValue("user", dbConnectionRequestPojo.getDatabaseUser())
-					.addValue("password", dbConnectionRequestPojo.getDatabasePassword());
+					.addValue("password", dbConnectionRequestPojo.getDatabasePassword())
+			        .addValue("schemaname",dbConnectionRequestPojo.getSchemaName());
 			int valid = parameterJdbcTemplate.update(sql, params);
 			if (valid > 0) {
 				response = uuid.toString();
@@ -328,6 +368,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			DataSource dynamicDataSource = new DynamicDataSource(jdbcUrls, databaseConnectionDTO.getConnectionUser(),
 					databaseConnectionDTO.getConnectionPassword());
 			namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dynamicDataSource);
+			
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while getting connection in dao");
 			throw new DataAccessResourceFailureException("An error occurred while getting connection in dao layer",
@@ -359,3 +400,6 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		return connection;
 	}
 }
+
+
+
