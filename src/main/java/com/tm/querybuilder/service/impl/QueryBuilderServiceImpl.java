@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.tm.querybuilder.clauses.Clauses;
+import com.tm.querybuilder.constant.MessageConstants;
 import com.tm.querybuilder.constant.QueryConstants;
 import com.tm.querybuilder.dao.QueryBuilderDao;
 import com.tm.querybuilder.dto.ColumnDatatypeDTO;
@@ -61,14 +62,23 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @return This method will check the schema name and table exist in dao.
 	 * 
 	 */
+	//Check if the schema exists for the given connectionId.
 	@Override
 	public Boolean isSchemaExist(String connectionId) {
 		LOGGER.info("Schema Exist service Method");
 		boolean isSchemaExist = false;
 		try {
 			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			String p=MessageConstants.POSTGRES;
+			if (p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver())) {
+				isSchemaExist = queryBuilderDao.isSchemaExist(databaseConnectionDTO.getConnectionSchemaname(),
+						databaseConnectionDTO);
+			}
+			else
+			{
 			isSchemaExist = queryBuilderDao.isSchemaExist(databaseConnectionDTO.getConnectionDb(),
 					databaseConnectionDTO);
+			}
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while checking is Schema Exist in service.");
 			throw new DataAccessResourceFailureException("An error occurred while checking is Schema Exist in service.",
@@ -83,12 +93,14 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @param tableName
 	 * @return This method will check the schema and table and column in dao.
 	 */
+	 //Validate whether the specified table and joined tables exist.
 	@Override
 	public Boolean isValidTable(String tableString, JoinsPOJO joinsPOJO, String connectionId) {
 		LOGGER.info("isValid table service");
 		Boolean isValidTable = false;
 		try {
 			Set<String> tablesList = new HashSet<>();
+			// Collect all joined table names
 			if (EmptyNotNull.isValidInput(joinsPOJO)) {
 				for (JoinDataPOJO joinTable : joinsPOJO.getJoin()) {
 					tablesList.add(joinTable.getJoinTableName());
@@ -96,8 +108,18 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			}
 			tablesList.add(tableString);
 			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			String p=MessageConstants.POSTGRES;
+			// Validate table existence depending on DB driver
+			if(p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver()))
+			{
+				isValidTable = queryBuilderDao.isValidTable(databaseConnectionDTO.getConnectionSchemaname(), tablesList,
+						databaseConnectionDTO);
+			}
+			else
+			{
 			isValidTable = queryBuilderDao.isValidTable(databaseConnectionDTO.getConnectionDb(), tablesList,
 					databaseConnectionDTO);
+			}
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while checking is valid Table in service.");
 			throw new DataAccessResourceFailureException("An error occurred while checking is valid Table in service.",
@@ -118,8 +140,17 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		List<ColumnDetailsDTO> columnDetailsList;
 		try {
 			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
-			columnDetailsList = queryBuilderDao.fetchColumnDetails(databaseConnectionDTO.getConnectionDb(),
-					databaseConnectionDTO);
+			String p=MessageConstants.POSTGRES;
+			if (p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver())) {
+				columnDetailsList = queryBuilderDao.fetchColumnDetails(databaseConnectionDTO.getConnectionSchemaname(),
+						databaseConnectionDTO);
+			}
+			else
+			{
+				columnDetailsList = queryBuilderDao.fetchColumnDetails(databaseConnectionDTO.getConnectionDb(),
+						databaseConnectionDTO);
+			}
+
 		} catch (DataAccessException exception) {
 			LOGGER.error("An error occurred while fetch ColumnDetailsDTO in service layer", exception);
 			throw new DataAccessResourceFailureException(
@@ -134,6 +165,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @return List<Map<String, Object>> By getting string as query in parameter
 	 *         based on the query in will execute.
 	 */
+	 
+	//Executes a count query and returns row count results.
 	private List<CountRowDTO> fetchCountQuery(String connectionId, String countqueryString) {
 		LOGGER.info("fetch Result Data service");
 		List<CountRowDTO> countQuery;
@@ -188,15 +221,19 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		StringBuilder querBuilder = new StringBuilder();
 		StringBuilder selectBuilder = new StringBuilder();
 		try {
+			//SELECT 
 			selectBuilder.append(QueryConstants.SELECT);
+			// Handle different combinations of column selection and aggregates
 			if (EmptyNotNull.isValidInput(filterData.getGroupBy())
 					&& !CollectionUtils.isEmpty(filterData.getColumnNames())
 					&& !CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
 				selectBuilder.append(String.join(",", filterData.getColumnNames()));
 				for (AggregateFunctionPOJO aggregateFunctionPOJO : filterData.getAggregateFunction()) {
-					selectBuilder.append(" ").append(aggregateFunctionPOJO.getAggregateTypes()).append("(")
-							.append(aggregateFunctionPOJO.getColumnName()).append(")");
+					selectBuilder.append(", ") 
+						.append(aggregateFunctionPOJO.getAggregateTypes()).append("(")
+						.append(aggregateFunctionPOJO.getColumnName()).append(")");
 				}
+
 			} else if (!CollectionUtils.isEmpty(filterData.getColumnNames())) {
 				selectBuilder.append(String.join(",", filterData.getColumnNames()));
 			} else if (!CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
@@ -208,16 +245,37 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				LOGGER.error("** Both the column list and aggregate function are empty **");
 				throw new DataAccessResourceFailureException("Both the column List and aggregate function are empty");
 			}
+			// FROM 
 			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			String p=MessageConstants.POSTGRES;
+			if(p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver()))
+			{
+				querBuilder.append(QueryConstants.FROM).append(databaseConnectionDTO.getConnectionSchemaname()).append(".")
+				.append(filterData.getTableName());
+			}
+			else
+			{
 			querBuilder.append(QueryConstants.FROM).append(databaseConnectionDTO.getConnectionDb()).append(".")
 					.append(filterData.getTableName());
-			String ifQueryPresent = ifQueryBuilder(filterData, databaseConnectionDTO.getConnectionDb(), connectionId);
+			}
+			// Append WHERE, JOIN, GROUP BY, HAVING
+			String ifQueryPresent;
+			if(p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver()))
+			{
+				ifQueryPresent = ifQueryBuilder(filterData, databaseConnectionDTO.getConnectionSchemaname(), connectionId);
+			}
+			else
+			{
+			     ifQueryPresent = ifQueryBuilder(filterData, databaseConnectionDTO.getConnectionDb(), connectionId);
+			}
 			if (EmptyNotNull.isValidInput(ifQueryPresent)) {
 				querBuilder.append(ifQueryPresent);
 			}
+			// ORDER BY
 			if (EmptyNotNull.isValidInput(filterData.getOrderBy())) {
 				querBuilder.append(keyTypes.getColumnOrderBy(filterData.getOrderBy()));
 			}
+			// LIMIT and OFFSET
 			querBuilder.append(keyTypes.getLimit(filterData, limit, offset));
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while fetch Query.");
@@ -225,31 +283,40 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		}
 		queryMap.put("selectQuery", selectBuilder.append(querBuilder).toString());
 		StringBuilder countBuilder = new StringBuilder();
+		
 		countBuilder.append(QueryConstants.SELECT_COUNT);
-		queryMap.put("countQuery", countBuilder.append(querBuilder).toString());
-
+		countBuilder.append(QueryConstants.FROM);
+		countBuilder.append("( ");
+		countBuilder.append(selectBuilder);
+		countBuilder.append(") AS count");
+		queryMap.put("countQuery", countBuilder.toString());
 		LOGGER.debug("Build Query for the request data service:{}", querBuilder);
 		return queryMap;
 	}
-
 	private String ifQueryBuilder(FilterDataPOJO filterData, String schemaString, String connectionId) {
 		StringBuilder querBuilder = new StringBuilder();
 		Clauses clauses = new Clauses();
 		try {
+			//JOIN
 			if (EmptyNotNull.isValidInput(filterData.getJoinData())) {
 				querBuilder.append(clauses.getOnCondition(filterData.getJoinData().getJoin(), schemaString));
 			}
+			//WHERE
 			if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
 				querBuilder.append(
-						clauses.whereCondition(filterData, getDataType(filterData, schemaString, connectionId)));
+					clauses.whereCondition(filterData, getDataType(filterData, schemaString, connectionId)));
 			}
+			//GROUPBY
 			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
 				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getColumnList())) {
 					querBuilder.append(clauses.groupBy(filterData.getGroupBy(), filterData.getColumnNames()));
 				}
 				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getConditionData())) {
-					querBuilder.append(clauses.having(filterData.getGroupBy().getConditionData(),
-							getDataType(filterData, schemaString, connectionId)));
+					querBuilder.append(clauses.having(
+						filterData.getGroupBy().getConditionData(),
+						getDataType(filterData, schemaString, connectionId),
+						filterData.getAggregateFunction() 
+					));
 				}
 			}
 		} catch (Exception exception) {
@@ -350,8 +417,17 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			}
 			tablesList.add(filterData.getTableName());
 			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			String p=MessageConstants.POSTGRES;
+			if(p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver()))
+			{
+				isValidColumn = queryBuilderDao.isValidColumns(columnsList, tablesList,
+						databaseConnectionDTO.getConnectionSchemaname(), databaseConnectionDTO);
+			}
+			else
+			{
 			isValidColumn = queryBuilderDao.isValidColumns(columnsList, tablesList,
 					databaseConnectionDTO.getConnectionDb(), databaseConnectionDTO);
+			}
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred Checking is valid Column details.");
 			throw new DataAccessResourceFailureException("An error occurred Checking is valid Column Details",
@@ -523,3 +599,4 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return isValid;
 	}
 }
+

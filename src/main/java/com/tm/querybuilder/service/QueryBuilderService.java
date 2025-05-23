@@ -61,3 +61,4 @@ public interface QueryBuilderService {
 	public boolean isValidConnection(String connectionId);
 
 }
+

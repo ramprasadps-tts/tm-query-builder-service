@@ -2,6 +2,7 @@ package com.tm.querybuilder.condition;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -11,101 +12,118 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tm.querybuilder.constant.DataTypeConstants;
 import com.tm.querybuilder.enums.Condition;
+import com.tm.querybuilder.pojo.AggregateFunctionPOJO;
 import com.tm.querybuilder.pojo.ConditionGroupPOJO;
 import com.tm.querybuilder.pojo.ConditionPOJO;
 import com.tm.querybuilder.pojo.ValuesPOJO;
 
 public class ConditionBuilder {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ConditionBuilder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConditionBuilder.class);
 
-	/**
-	 * Build the condition by using condition list and datatype of columns for where
-	 * clause conditon and having clause.
-	 * 
-	 * @param filterData
-	 * @param datatypeMap
-	 * @return
-	 */
-	public String fetchCondition(List<ConditionGroupPOJO> conditionGroupList, Map<String, Object> columnDataTypeMap) {
-		LOGGER.info("building where condition method");
-		StringBuilder conditionBuilder = new StringBuilder();
-		try {
-			for (ConditionGroupPOJO conditionGroup : conditionGroupList) {
-				conditionBuilder.append("(");
-				for (ConditionPOJO conditionList : conditionGroup.getConditionList()) {
-					conditionBuilder.append(conditionList.getColumn()).append(" ")
-							.append(conditionList.getCondition().getOperator());
-					if (DataTypeConstants.getBetweenData().contains(columnDataTypeMap.get(conditionList.getColumn()))
-							&& Condition.BETWEEN.equals(conditionList.getCondition())) {
-						ObjectMapper mapper = new ObjectMapper();
-						ValuesPOJO value = mapper.readValue(mapper.writeValueAsString(conditionList.getValue()),
-								ValuesPOJO.class);
-						conditionBuilder.append(" '").append(value.getFrom()).append("' ").append("AND ").append("'")
-								.append(value.getTo()).append("'");
-					} else if (DataTypeConstants.getNumData().contains(columnDataTypeMap.get(conditionList.getColumn()))
-							&& Condition.BETWEEN.equals(conditionList.getCondition())) {
-						ObjectMapper mapper = new ObjectMapper();
-						ValuesPOJO value = mapper.readValue(mapper.writeValueAsString(conditionList.getValue()),
-								ValuesPOJO.class);
-						conditionBuilder.append(" ").append(value.getFrom()).append(" ").append("AND ")
-								.append(value.getTo()).append(" ");
-					} else if (Condition.IN.equals(conditionList.getCondition())
-							|| Condition.NOTIN.equals(conditionList.getCondition())) {
-						Object value;
-						if (DataTypeConstants.getNumData().contains(columnDataTypeMap.get(conditionList.getColumn()))) {
-							List<Integer> list = (List<Integer>) conditionList.getValue();
-							String intString = list.stream().map(Object::toString).collect(Collectors.joining(","));
-							value = intString;
-						} else {
-							List<String> list = (List<String>) conditionList.getValue();
-							value = list.stream().collect(Collectors.joining("','", "'", "'"));
-						}
-						conditionBuilder.append(" (").append(value).append(")");
-					} else if (Condition.LIKE.equals(conditionList.getCondition())
-							|| Condition.STARTWITH.equals(conditionList.getCondition())
-							|| Condition.ENDWITH.equals(conditionList.getCondition())) {
-						switch (conditionList.getCondition()) {
-						case STARTWITH:
-							conditionBuilder.append(" '").append(conditionList.getValue()).append("%").append("'");
-							break;
-						case ENDWITH:
-							conditionBuilder.append(" '").append("%").append(conditionList.getValue()).append("'");
-							break;
-						case LIKE:
-							conditionBuilder.append(" '").append("%").append(conditionList.getValue()).append("%")
-									.append("'");
-							break;
-						default:
-						}
-					}
-					// check whether the column data type is a part of operater list to add single
-					// quotes in prefix and suffix
-					else if (DataTypeConstants.getOperatorString()
-							.contains(columnDataTypeMap.get(conditionList.getColumn()))) {
-						conditionBuilder.append("'").append(conditionList.getValue()).append("'");
-					} else {
-						conditionBuilder.append(conditionList.getValue());
-					}
-					// Append condition to the where group list if the condition has value
-					// ConditionBuilder will be null if it is the last item of the list.
-					if (conditionList.getLogicalCondition() != null) {
-						conditionBuilder.append(" ").append(conditionList.getLogicalCondition()).append(" ");
-					}
-				}
-				conditionBuilder.append(")");
-				// Append condition to the where list if the condition has value
-				// ConditionBuilder will be null if it is the last item of the list
-				if (conditionGroup.getLogicalCondition() != null) {
-					conditionBuilder.append(" ").append(conditionGroup.getLogicalCondition().name()).append(" ");
-				}
-			}
-		} catch (Exception exception) {
-			LOGGER.error("An error occurred while building where condition. ");
-			throw new DataAccessResourceFailureException("An error occurred while building where condition .",
-					exception);
-		}
-		LOGGER.debug("where ConditionBuilder:{}", conditionBuilder);
-		return conditionBuilder.toString();
-	}
+    private Set<String> aggregateColumns;
+
+    public ConditionBuilder() {
+    }
+
+    public ConditionBuilder(List<AggregateFunctionPOJO> aggregates) {
+        if (aggregates != null) {
+            this.aggregateColumns = aggregates.stream()
+                .map(AggregateFunctionPOJO::getColumnName)
+                .collect(Collectors.toSet());
+        }
+    }
+
+    public String fetchCondition(List<ConditionGroupPOJO> conditionGroupList, Map<String, Object> columnDataTypeMap) {
+        LOGGER.info("Building condition string");
+        StringBuilder conditionBuilder = new StringBuilder();
+        try {
+            for (int groupIndex = 0; groupIndex < conditionGroupList.size(); groupIndex++) {
+                ConditionGroupPOJO conditionGroup = conditionGroupList.get(groupIndex);
+                conditionBuilder.append("(");
+
+                List<ConditionPOJO> conditionList = conditionGroup.getConditionList();
+                for (int i = 0; i < conditionList.size(); i++) {
+                    ConditionPOJO cond = conditionList.get(i);
+                    String columnName = cond.getColumn();
+
+                    // Use aggregate if applicable
+                    if (aggregateColumns != null && aggregateColumns.contains(columnName)) {
+                        columnName = "COUNT(" + columnName + ")";
+                    }
+
+                    conditionBuilder.append(columnName)
+                        .append(" ")
+                        .append(cond.getCondition().getOperator());
+
+                    Object columnType = columnDataTypeMap.get(cond.getColumn());
+
+                    // BETWEEN Handling
+                    if (DataTypeConstants.getBetweenData().contains(columnType) && Condition.BETWEEN.equals(cond.getCondition())) {
+                        ObjectMapper mapper = new ObjectMapper();
+                        ValuesPOJO value = mapper.readValue(mapper.writeValueAsString(cond.getValue()), ValuesPOJO.class);
+                        conditionBuilder.append(" '").append(value.getFrom()).append("' AND '").append(value.getTo()).append("'");
+
+                    } else if (DataTypeConstants.getNumData().contains(columnType) && Condition.BETWEEN.equals(cond.getCondition())) {
+                        ObjectMapper mapper = new ObjectMapper();
+                        ValuesPOJO value = mapper.readValue(mapper.writeValueAsString(cond.getValue()), ValuesPOJO.class);
+                        conditionBuilder.append(" ").append(value.getFrom()).append(" AND ").append(value.getTo());
+
+                    // IN/NOT IN Handling
+                    } else if (Condition.IN.equals(cond.getCondition()) || Condition.NOTIN.equals(cond.getCondition())) {
+                        if (DataTypeConstants.getNumData().contains(columnType)) {
+                            List<Integer> list = (List<Integer>) cond.getValue();
+                            String intString = list.stream().map(Object::toString).collect(Collectors.joining(","));
+                            conditionBuilder.append(" (").append(intString).append(")");
+                        } else {
+                            List<String> list = (List<String>) cond.getValue();
+                            String strList = list.stream().collect(Collectors.joining("','", "'", "'"));
+                            conditionBuilder.append(" (").append(strList).append(")");
+                        }
+
+                    // LIKE, STARTWITH, ENDWITH Handling
+                    } else if (Condition.LIKE.equals(cond.getCondition()) ||
+                               Condition.STARTWITH.equals(cond.getCondition()) ||
+                               Condition.ENDWITH.equals(cond.getCondition())) {
+                        switch (cond.getCondition()) {
+                            case STARTWITH:
+                                conditionBuilder.append(" '").append(cond.getValue()).append("%'");
+                                break;
+                            case ENDWITH:
+                                conditionBuilder.append(" '%").append(cond.getValue()).append("'");
+                                break;
+                            case LIKE:
+                                conditionBuilder.append(" '%").append(cond.getValue()).append("%'");
+                                break;
+                            default:
+                        }
+
+                    // String vs Numeric Handling
+                    } else if (DataTypeConstants.getOperatorString().contains(columnType)) {
+                        conditionBuilder.append(" '").append(cond.getValue()).append("'");
+                    } else {
+                        conditionBuilder.append(" ").append(cond.getValue());
+                    }
+
+                    // Append logical condition between conditions
+                    if (i < conditionList.size() - 1 && cond.getLogicalCondition() != null) {
+                        conditionBuilder.append(" ").append(cond.getLogicalCondition()).append(" ");
+                    }
+                }
+
+                conditionBuilder.append(")");
+
+                // Append group logical condition between groups
+                if (groupIndex < conditionGroupList.size() - 1 && conditionGroup.getLogicalCondition() != null) {
+                    conditionBuilder.append(" ").append(conditionGroup.getLogicalCondition().name()).append(" ");
+                }
+            }
+        } catch (Exception exception) {
+            LOGGER.error("An error occurred while building where/having condition.");
+            throw new DataAccessResourceFailureException("An error occurred while building condition.", exception);
+        }
+        LOGGER.debug("Condition SQL: {}", conditionBuilder);
+        return conditionBuilder.toString();
+    }
 }
+

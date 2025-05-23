@@ -1,8 +1,10 @@
 package com.tm.querybuilder.clauses;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -10,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.tm.querybuilder.condition.ConditionBuilder;
 import com.tm.querybuilder.constant.QueryConstants;
+import com.tm.querybuilder.pojo.AggregateFunctionPOJO;
 import com.tm.querybuilder.pojo.ConditionGroupPOJO;
 import com.tm.querybuilder.pojo.FilterDataPOJO;
 import com.tm.querybuilder.pojo.GroupByPOJO;
@@ -21,13 +24,6 @@ public class Clauses {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Clauses.class);
 
-	/**
-	 * Build the where Clause and get the condition by fetch condition method
-	 * 
-	 * @param filterData
-	 * @param datatype
-	 * @return
-	 */
 	public String whereCondition(FilterDataPOJO filterData, Map<String, Object> datatype) {
 		ConditionBuilder condition = new ConditionBuilder();
 		StringBuilder querBuilder = new StringBuilder();
@@ -35,22 +31,15 @@ public class Clauses {
 			querBuilder.append(QueryConstants.WHERE)
 					.append(condition.fetchCondition(filterData.getWhereData().getConditionData(), datatype));
 		} catch (Exception exception) {
-			LOGGER.error("An error occurred while Where condition.");
-			throw new DataAccessResourceFailureException("An error occurred while  query.", exception);
+			LOGGER.error("An error occurred while building WHERE condition.");
+			throw new DataAccessResourceFailureException("An error occurred while building WHERE condition.", exception);
 		}
-		LOGGER.debug("where Conditions : {}", condition);
+		LOGGER.debug("WHERE Conditions : {}", querBuilder);
 		return querBuilder.toString();
 	}
 
-	/**
-	 * This method build on condition in joins using string builder.
-	 * 
-	 * @param joinDataList
-	 * @param schemaString
-	 * @return
-	 */
 	public String getOnCondition(List<JoinDataPOJO> joinDataList, String schemaString) {
-		LOGGER.info("build On condition using string builder method");
+		LOGGER.info("Build ON condition using string builder method");
 		StringBuilder conditionBuilder = new StringBuilder();
 		try {
 			for (JoinDataPOJO joinData : joinDataList) {
@@ -60,7 +49,7 @@ public class Clauses {
 						&& !CollectionUtils.isEmpty(joinData.getJoinCondition())) {
 					conditionBuilder.append("ON");
 					for (JoinConditionPOJO joinConditionDto : joinData.getJoinCondition()) {
-						conditionBuilder.append(" ").append("(").append(joinConditionDto.getLsColumn())
+						conditionBuilder.append(" (").append(joinConditionDto.getLsColumn())
 								.append(" ").append(joinConditionDto.getCondition().getOperator()).append(" ")
 								.append(joinConditionDto.getRsColumn()).append(")");
 						if (EmptyNotNull.isValidInput(joinConditionDto.getLogicalCondition())) {
@@ -70,24 +59,15 @@ public class Clauses {
 				}
 			}
 		} catch (Exception exception) {
-			LOGGER.error("An error occurred while Getting Join condition query.");
-			throw new DataAccessResourceFailureException("An error occurred while getting Join condition query.",
-					exception);
+			LOGGER.error("An error occurred while building JOIN condition.");
+			throw new DataAccessResourceFailureException("An error occurred while building JOIN condition.", exception);
 		}
-		LOGGER.debug("On conditon : {}", conditionBuilder);
+		LOGGER.debug("ON condition: {}", conditionBuilder);
 		return conditionBuilder.toString();
 	}
 
-	/**
-	 * Build the Group by by using list of columns in and group by column list
-	 * 
-	 * 
-	 * @param groupBy
-	 * @param columnsList
-	 * @return
-	 */
 	public String groupBy(GroupByPOJO groupBy, List<String> columnsList) {
-		LOGGER.info("**Group by service**");
+		LOGGER.info("Building GROUP BY clause");
 		StringBuilder groupByBuilder = new StringBuilder();
 		try {
 			Set<String> columnList = new HashSet<>();
@@ -97,29 +77,32 @@ public class Clauses {
 			columnList.addAll(columnsList);
 			groupByBuilder.append(QueryConstants.GROUPBY).append(String.join(",", columnList));
 		} catch (Exception exception) {
-			LOGGER.error("An error occurred while get group by in service.");
-			throw new DataAccessResourceFailureException("An error occurred while get group by in service", exception);
+			LOGGER.error("An error occurred while building GROUP BY clause.");
+			throw new DataAccessResourceFailureException("An error occurred while building GROUP BY clause.", exception);
 		}
 		return groupByBuilder.toString();
 	}
 
 	/**
-	 * Build the having clause
-	 * 
-	 * @param conditionGroup
-	 * @param datatype
-	 * @return
+	 * Build the HAVING clause using aggregates
+	 *
+	 * @param conditionGroup the HAVING conditions
+	 * @param datatype the column data types
+	 * @param aggregates the aggregate functions used in SELECT
+	 * @return a valid HAVING clause
 	 */
-	public String having(List<ConditionGroupPOJO> conditionGroup, Map<String, Object> datatype) {
-		ConditionBuilder condition = new ConditionBuilder();
+	public String having(List<ConditionGroupPOJO> conditionGroup, Map<String, Object> datatype,
+						 List<AggregateFunctionPOJO> aggregates) {
+		ConditionBuilder condition = new ConditionBuilder(aggregates); // Pass aggregate functions
 		StringBuilder havingBuilder = new StringBuilder();
 		try {
-			havingBuilder.append(QueryConstants.HAVING).append(condition.fetchCondition(conditionGroup, datatype));
+			havingBuilder.append(QueryConstants.HAVING)
+					.append(condition.fetchCondition(conditionGroup, datatype));
 		} catch (Exception exception) {
-			LOGGER.error("An error occurred while get having in Clauses");
-			throw new DataAccessResourceFailureException("An error occurred while get group by in service", exception);
+			LOGGER.error("An error occurred while building HAVING clause.");
+			throw new DataAccessResourceFailureException("An error occurred while building HAVING clause.", exception);
 		}
 		return havingBuilder.toString();
 	}
-
 }
+

@@ -6,6 +6,7 @@ public class MessageConstants {
 	}
 
 	public static final String FROM = " FROM ";
+	public static final String POSTGRES="postgresql";
 	public static final String COLUMN_NAME = "column_name";
 	public static final String DATA_TYPE = "data_type";
 	public static final String TABLE_NAME = "tableName";
