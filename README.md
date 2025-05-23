@@ -11,10 +11,13 @@ git clone https://github.com/ramprasadps-tts/tm-query-builder-service
 Open it in Spring Tool Suite (STS) or your preferred IDE.
 
 2. Configure application.properties
+   
 Update DataBase settings (MySQL) in:
+
 src/main/resources/application.properties
 
-3. MySQL Setup
+4. MySQL Setup
+   
     • Start local MySQL
    
     • Create a database named querybuilder
@@ -41,21 +44,21 @@ Columns:
 	connection_schemaname	varchar(25)
  
 
-API Endpoints
+4.API Endpoints
 
-1.Create Database Connection
+i).Create Database Connection
 
 POST /querybuilder/database/connection
 
-2.Fetch Table and Column Details
+ii).Fetch Table and Column Details
 
 POST /querybuilder/columndetails/fetchColumnDetails
 
-3. Fetch Table Data
-4. 
+iii). Fetch Table Data
+   
 POST /querybuilder/data/fetchResultData
 
-5. Fetch SQL Query
-6. 
+iv). Fetch SQL Query
+   
 POST /querybuilder/query/fetchQuery
 
