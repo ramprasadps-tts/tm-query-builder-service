@@ -1,65 +1,51 @@
-Query Builder:
+# Query Builder
 
-A Spring Boot-based service that dynamically connects to MySQL or PostgreSQL databases to generate SQL queries and retrieve table data.
+Query Builder is a Spring Boot-based service that dynamically connects to **MySQL** or **PostgreSQL** databases. It provides RESTful APIs to retrieve table metadata, generate SQL queries, and access table data with pagination. The service simplifies backend data analysis and integration tasks without requiring manual SQL scripting.
 
-Setup Instructions:
+---
 
-1.Clone the Repository
+## Prerequisites
 
+Before you begin, ensure you have the following installed:
+
+- Java 11
+- Maven 3.2
+- Git
+- MySQL 8.x
+- PostgreSQL 14+
+- Spring Tool Suite (STS) 
+- Postman
+
+---
+
+## Setup Instructions
+
+### 1. Clone the Repository
+
+Clone the project and open it in Spring Tool Suite or your preferred IDE:
+
+```bash
 git clone https://github.com/ramprasadps-tts/tm-query-builder-service
 
-Open it in Spring Tool Suite (STS) or your preferred IDE.
+## MySQL Setup
 
-2. Configure application.properties
-   
-Update DataBase settings (MySQL) in:
+To run the application with MySQL, follow these steps:
 
-src/main/resources/application.properties
+### 1. Start MySQL
 
-4. MySQL Setup
-   
-    • Start local MySQL
-   
-    • Create a database named querybuilder
-   
-CREATE DATABASE querybuilder;
-   
-    • Create the following table:
+Ensure MySQL server is running locally.
 
- CREATE TABLE db_connection (
-  connection_id VARCHAR(255) PRIMARY KEY,
-  
-  connection_host VARCHAR(255),
-  
-  connection_db VARCHAR(255),
-  
-  connection_port VARCHAR(10),
-  
-  connection_driver VARCHAR(20),
-  
-  connection_user VARCHAR(100),
-  
-  connection_password VARCHAR(100),
-  
-  connection_schemaname VARCHAR(25)
-);
- 
+### 2. Create Database and Table
 
-4.API Endpoints
+You can create the required database and table by executing the provided DDL script.
 
-i).Create Database Connection
+**DDL Script Location:**
 
-POST /querybuilder/database/connection
+[tm-query-builder-service-ddl.sql](https://github.com/ramprasadps-tts/tm-query-builder-service/blob/postgres-integration/tm-query-builder-service-ddl.sql)
 
-ii).Fetch Table and Column Details
+### 3. Execute the Script
 
-POST /querybuilder/columndetails/fetchColumnDetails
+Run the script using the MySQL command-line tool:
 
-iii). Fetch Table Data
-   
-POST /querybuilder/data/fetchResultData
-
-iv). Fetch SQL Query
-   
-POST /querybuilder/query/fetchQuery
-
+```bash
+mysql -u root -p < tm-query-builder-service-ddl.sql
