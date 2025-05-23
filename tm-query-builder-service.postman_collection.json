@@ -1,0 +1,670 @@
+{
+	"info": {
+		"_postman_id": "670a08b3-6929-4edc-8efd-a40818b18ab0",
+		"name": "tm-query-builder-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44943649"
+	},
+	"item": [
+		{
+			"name": "query-builder-database-connection-mysql",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"connectionHost\": \"localhost\",\n  \"connectionPort\": 3306,\n  \"connectionDriver\": \"mysql\",\n  \"databaseUser\": \"root\",\n  \"databasePassword\": \"password\",\n  \"databaseName\": \"demodb\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/database/connection",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"database",
+						"connection"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetch-TableDetails-ColumnDetails",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"af3a1bb4-10b1-4784-9c42-d099dead2209\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/columndetails/fetchColumnDetails",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"columndetails",
+						"fetchColumnDetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-database-connection-postgresql",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"connectionHost\": \"localhost\",\n  \"connectionPort\": 5432,\n  \"connectionDriver\": \"postgresql\",\n  \"databaseUser\": \"postgres\",\n  \"databasePassword\": \"postgres\",\n  \"databaseName\": \"Query\",\n  \"schemaName\":\"demoqb\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/database/connection",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"database",
+						"connection"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchdata-orderby",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"af3a1bb4-10b1-4784-9c42-d099dead2209\",\n\"requestData\": {\n\"tableName\": \"Persons\",\n\"columnNames\": [\"PersonID\", \"Name\"],\n\"orderBy\": [\n{\n\"orderColumnName\": \"Name\",\n\"orderType\": \"ASC\"\n}\n],\n\"limit\": 10,\n\"pageNo\": 1\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/data/fetchResultData",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"data",
+						"fetchResultData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchdata-select",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"af3a1bb4-10b1-4784-9c42-d099dead2209\",\n\"requestData\": {\n\"tableName\":\"db_connection\",\n\"columnNames\":[\"connection_id\",\"connection_port\"],\n\"limit\": 10,\n\"pageNo\": 1\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/data/fetchResultData",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"data",
+						"fetchResultData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchdata-where",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"af3a1bb4-10b1-4784-9c42-d099dead2209\",\n\"requestData\": {\n\"tableName\": \"Persons\",\n\"columnNames\": [\"PersonID\", \"Name\"],\n\"limit\": 10,\n\"pageNo\": 1,\n\"whereData\": {\n\"conditionData\": [\n{\n\"conditionList\": [\n{\n\"column\": \"Name\",\n\"condition\": \"LIKE\",\n\"value\": \"r%\"\n}\n],\n\"logicalCondition\": null\n}\n]\n}\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/data/fetchResultData",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"data",
+						"fetchResultData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchdata-having",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"af3a1bb4-10b1-4784-9c42-d099dead2209\",\n\"requestData\": {\n\"tableName\": \"Persons\",\n\"columnNames\": [\"PersonID\"],\n\"limit\": 10,\n\"pageNo\": 1,\n\"aggregateFunction\": [\n{\n\"columnName\": \"Name\",\n\"aggregateTypes\": \"COUNT\",\n\"alias\": \"name_count\"\n}\n],\n\"groupBy\": {\n\"columnList\": [\"PersonID\"],\n\"conditionData\": [\n{\n\"logicalCondition\": \"AND\",\n\"conditionList\": [\n{\n\"aggregate\": \"COUNT\",\n\"column\": \"Name\",\n\"condition\": \"GT\",\n\"value\": 0\n}\n]\n\n}\n]\n}\n}\n\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/data/fetchResultData",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"data",
+						"fetchResultData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchdata-aggregate-groupby",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"af3a1bb4-10b1-4784-9c42-d099dead2209\",\n\"requestData\": {\n\"tableName\": \"Persons\",\n\"columnNames\": [\"PersonID\"],\n\"limit\": 10,\n\"pageNo\": 1,\n\"aggregateFunction\": [\n{\n\"columnName\": \"Name\",\n\"aggregateTypes\": \"COUNT\",\n\"alias\": \"name_count\"\n}\n],\n\"groupBy\": {\n\"columnList\": [\"PersonID\"]\n}\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/data/fetchResultData",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"data",
+						"fetchResultData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchdata-join",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"661ffb7c-0f8c-495f-b279-775f558ccb96\",\n\"requestData\": {\n\"tableName\": \"fruits\", \n\"columnNames\": [\"fruit_id\", \"name\"], \n\"joinData\": {\n\"isPrimaryKey\": true,\n\"join\": [\n{\n\"joinTableName\": \"shopping\",\n\"joinType\": \"INNERJOIN\",\n\"columnNames\": [\"product_name\"],\n\"joinCondition\": [\n{\n\"lsColumn\": \"name\",\n\"rsColumn\": \"product_name\",\n\"condition\": \"EQUAL\"\n}\n]\n}\n]\n},\n\"limit\": 10,\n\"pageNo\": 1\n}\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/data/fetchResultData",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"data",
+						"fetchResultData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchquery-join",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"af3a1bb4-10b1-4784-9c42-d099dead2209\",\n\"requestData\": {\n\"tableName\": \"Persons\",\n\"columnNames\": [\"PersonID\", \"Name\"],\n\"joinData\": {\n\"isPrimaryKey\": true,\n\"join\": [\n{\n\"joinTableName\": \"orders\",\n\"joinType\": \"RIGHTJOIN\",\n\"columnNames\": [\"order_id\", \"order_date\", \"customer_name\"],\n\"joinCondition\": [\n{\n\"lsColumn\": \"Name\",\n\"rsColumn\": \"customer_name\",\n\"condition\": \"EQUAL\",\n\"logicalCondition\":\"AND\"\n},\n{\n\"lsColumn\": \"PersonID\",\n\"rsColumn\": \"order_id\",\n\"condition\": \"EQUAL\"\n}\n]\n}\n]\n},\n\"limit\": 10,\n\"pageNo\": 1\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/query/fetchQuery",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"query",
+						"fetchQuery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchquery-select",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"af3a1bb4-10b1-4784-9c42-d099dead2209\",\n\"requestData\": {\n\"tableName\":\"db_connection\",\n\"columnNames\":[\"connection_id\",\"connection_port\"],\n\"limit\": 10,\n\"pageNo\": 1\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/query/fetchQuery",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"query",
+						"fetchQuery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchquery-where",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"661ffb7c-0f8c-495f-b279-775f558ccb96\",\n\"requestData\": {\n\"tableName\": \"fruits\",\n\"columnNames\": [\"fruit_id\", \"name\"],\n\"limit\": 5,\n\"pageNo\": 1,\n\"whereData\": {\n\"conditionData\": [\n{\n\"logicalCondition\": \" AND\",\n\"conditionList\": [\n{\n\"column\": \"name\",\n\"condition\": \"LIKE\",\n\"value\": \"A%\",\n\"logicalCondition\": \" AND\"\n},\n{\n\"column\": \"fruit_id\",\n\"condition\": \"GT\",\n\"value\": \"1\"\n}\n]\n}\n]\n}\n}\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/query/fetchQuery",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"query",
+						"fetchQuery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchquery-orderby",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"661ffb7c-0f8c-495f-b279-775f558ccb96\",\n\"requestData\": {\n\"tableName\": \"fruits\",\n\"columnNames\": [\"fruit_id\", \"name\"],\n\"orderBy\": [\n{\n\"orderColumnName\": \"fruit_id\",\n\"orderType\": \"DESC\"\n},\n{\n\"orderColumnName\": \"name\",\n\"orderType\": \"ASC\"\n}\n],\n\"limit\": 20,\n\"pageNo\": 1\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/query/fetchQuery",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"query",
+						"fetchQuery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchquery-join",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"661ffb7c-0f8c-495f-b279-775f558ccb96\",\n\"requestData\": {\n\"tableName\": \"fruits\",\n\"columnNames\": [\"fruit_id\", \"name\", \"color\",\"quantity\"],\n\"joinData\": {\n\"isPrimaryKey\": true,\n\"join\": [\n{\n\"joinTableName\": \"shopping\",\n\"joinType\": \"LEFTJOIN\",\n\"columnNames\": [\"s_no\", \"product_name\", \"quantity\"],\n\"joinCondition\": [\n{\n\"lsColumn\": \"name\",\n\"rsColumn\": \"product_name\",\n\"condition\": \"EQUAL\"\n}\n]\n}\n]\n},\n\"limit\": 10,\n\"pageNo\": 1\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/query/fetchQuery",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"query",
+						"fetchQuery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchquery-having",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"661ffb7c-0f8c-495f-b279-775f558ccb96\",\n\"requestData\": {\n\"tableName\": \"fruits\",\n\"columnNames\": [\"fruit_id\"],\n\"limit\": 10,\n\"pageNo\": 1,\n\"aggregateFunction\": [\n{\n\"columnName\": \"name\",\n\"aggregateTypes\": \"COUNT\",\n\"alias\": \"name_count\"\n}\n],\n\"groupBy\": {\n\"columnList\": [\"fruit_id\"],\n\"conditionData\": [\n{\n\"logicalCondition\": \"AND\",\n\"conditionList\": [\n{\n\"aggregate\": \"COUNT\",\n\"column\": \"name\",\n\"condition\": \"GT\",\n\"value\": 1\n}\n]\n}\n]\n}\n}\n}\n\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/query/fetchQuery",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"query",
+						"fetchQuery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchquery-aggregate-groupby",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"661ffb7c-0f8c-495f-b279-775f558ccb96\",\n\"requestData\": {\n\"tableName\": \"fruits\",\n\"columnNames\": [\"fruit_id\"],\n\"limit\": 10,\n\"pageNo\": 1,\n\"aggregateFunction\": [\n{\n\"columnName\": \"name\",\n\"aggregateTypes\": \"COUNT\",\n\"alias\": \"name_count\"\n}\n],\n\"groupBy\": {\n\"columnList\": [\"fruit_id\"]\n}\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/query/fetchQuery",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"query",
+						"fetchQuery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchquery-aggregate-where-groupby",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"connectionId\": \"661ffb7c-0f8c-495f-b279-775f558ccb96\",\n\"requestData\": {\n\"tableName\": \"shopping\",\n\"columnNames\": [\"s_no\", \"product_name\"],\n\"limit\": 10,\n\"pageNo\": 1,\n\"aggregateFunction\": [\n{\n\"columnName\": \"quantity\",\n\"aggregateTypes\": \"SUM\",\n\"alias\": \"total_quantity\"\n}\n],\n\"groupBy\": {\n\"columnList\": [\"product_name\"]\n},\n\"whereData\": {\n\"conditionData\": [\n{\n\"conditionList\": [\n{\n\"column\": \"quantity\",\n\"condition\": \"LT\",\n\"value\": 500\n}\n],\n\"logicalCondition\": \"OR\"\n}\n]\n}\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/query/fetchQuery",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"query",
+						"fetchQuery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchdata-aggregate-where-groupby",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"connectionId\": \"af3a1bb4-10b1-4784-9c42-d099dead2209\",\n  \"requestData\": {\n    \"tableName\": \"orders\",\n    \"columnNames\": [\"order_id\", \"customer_name\"],\n    \"limit\": 10,\n    \"pageNo\": 1,\n    \"aggregateFunction\": [\n      {\n        \"columnName\": \"total_amount\",\n        \"aggregateTypes\": \"SUM\",\n        \"alias\": \"total_spent\"\n      }\n    ],\n    \"groupBy\": {\n      \"columnList\": [\"customer_name\"]\n    },\n    \"whereData\": {\n      \"conditionData\": [\n        {\n          \"conditionList\": [\n            {\n              \"column\": \"total_amount\",\n              \"condition\": \"GT\",\n              \"value\": 100,\n              \"logicalCondition\":\"OR\"\n            },\n            {\n              \"column\": \"order_date\",\n              \"condition\": \"LT\",\n              \"value\": \"2025-01-01\"\n            }\n          ],\n          \"logicalCondition\": \"OR\"\n        }\n      ]\n    }\n  }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/data/fetchResultData",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"data",
+						"fetchResultData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchdata",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"connectionId\": \"661ffb7c-0f8c-495f-b279-775f558ccb96\",\n  \"requestData\": {\n    \"tableName\": \"shopping\",\n    \"columnNames\": [\"s_no\", \"product_name\", \"fruit_id\", \"name\"],\n    \"joinData\": {\n      \"isPrimaryKey\": true,\n      \"join\": [\n        {\n          \"joinTableName\": \"fruits\",\n          \"joinType\": \"INNERJOIN\",\n          \"columnNames\": [\"fruit_id\", \"name\"],\n          \"joinCondition\": [\n            {\n              \"lsColumn\": \"product_name\",\n              \"rsColumn\": \"name\",\n              \"condition\": \"EQUAL\"\n            }\n          ]\n        }\n      ]\n    },\n    \"aggregateFunction\": [\n      {\n        \"columnName\": \"quantity\",\n        \"aggregateTypes\": \"SUM\",\n        \"alias\": \"total_quantity_sold\"\n      }\n    ],\n    \"groupBy\": {\n      \"columnList\": [\"name\"]\n    },\n    \"whereData\": {\n      \"conditionData\": [\n        {\n          \"conditionList\": [\n            {\n              \"column\": \"quantity\",\n              \"condition\": \"LT\",\n              \"value\": 50\n            }\n          ],\n          \"logicalCondition\": \"AND\"\n        }\n      ]\n    },\n    \"orderBy\": [\n      {\n        \"orderColumnName\": \"quantity\",\n        \"orderType\": \"DESC\"\n      }\n    ],\n    \"limit\": 10,\n    \"pageNo\": 1\n  }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/data/fetchResultData",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"data",
+						"fetchResultData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query-builder-fetchquery",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"connectionId\": \"661ffb7c-0f8c-495f-b279-775f558ccb96\",\n  \"requestData\": {\n    \"tableName\": \"shopping\",\n    \"columnNames\": [\"s_no\", \"product_name\", \"fruit_id\", \"name\"],\n    \"joinData\": {\n      \"isPrimaryKey\": true,\n      \"join\": [\n        {\n          \"joinTableName\": \"fruits\",\n          \"joinType\": \"INNERJOIN\",\n          \"columnNames\": [\"fruit_id\", \"name\"],\n          \"joinCondition\": [\n            {\n              \"lsColumn\": \"product_name\",\n              \"rsColumn\": \"name\",\n              \"condition\": \"EQUAL\"\n            }\n          ]\n        }\n      ]\n    },\n    \"aggregateFunction\": [\n      {\n        \"columnName\": \"quantity\",\n        \"aggregateTypes\": \"SUM\",\n        \"alias\": \"total_quantity_sold\"\n      }\n    ],\n    \"groupBy\": {\n      \"columnList\": [\"name\"]\n    },\n    \"whereData\": {\n      \"conditionData\": [\n        {\n          \"conditionList\": [\n            {\n              \"column\": \"quantity\",\n              \"condition\": \"LT\",\n              \"value\": 50\n            }\n          ],\n          \"logicalCondition\": \"AND\"\n        }\n      ]\n    },\n    \"orderBy\": [\n      {\n        \"orderColumnName\": \"quantity\",\n        \"orderType\": \"DESC\"\n      }\n    ],\n    \"limit\": 10,\n    \"pageNo\": 1\n  }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/query/fetchQuery",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"query",
+						"fetchQuery"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
