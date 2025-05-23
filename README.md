@@ -22,26 +22,27 @@ src/main/resources/application.properties
    
     • Create a database named querybuilder
    
-    • Create the following table:
+CREATE DATABASE querybuilder;
    
-Table: db_connection
+    • Create the following table:
 
-Columns:
-	connection_id	varchar(255) PK
- 
-	connection_host	varchar(255)
- 
-	connection_db	varchar(255)
- 
-	connection_port	varchar(10)
- 
-	connection_driver	varchar(20)
- 
-	connection_user	varchar(100)
- 
-	connection_password	varchar(100)
- 
-	connection_schemaname	varchar(25)
+ CREATE TABLE db_connection (
+  connection_id VARCHAR(255) PRIMARY KEY,
+  
+  connection_host VARCHAR(255),
+  
+  connection_db VARCHAR(255),
+  
+  connection_port VARCHAR(10),
+  
+  connection_driver VARCHAR(20),
+  
+  connection_user VARCHAR(100),
+  
+  connection_password VARCHAR(100),
+  
+  connection_schemaname VARCHAR(25)
+);
  
 
 4.API Endpoints
