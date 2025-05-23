@@ -26,7 +26,7 @@ Clone the project and open it in Spring Tool Suite or your preferred IDE:
 
 ```bash
 git clone https://github.com/ramprasadps-tts/tm-query-builder-service
-
+```
 ## MySQL Setup
 
 To run the application with MySQL, follow these steps:
@@ -49,3 +49,4 @@ Run the script using the MySQL command-line tool:
 
 ```bash
 mysql -u root -p < tm-query-builder-service-ddl.sql
+```
