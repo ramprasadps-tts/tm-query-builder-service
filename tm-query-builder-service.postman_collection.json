@@ -665,6 +665,30 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Acutator",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/querybuilder/actuator/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"querybuilder",
+						"actuator",
+						"health"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
