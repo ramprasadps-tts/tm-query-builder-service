@@ -15,7 +15,7 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   app:
-    image: query-builder-app:1.6.1-SNAPSHOT
+    image: query-builder-app:1.6.1
     container_name: query-app
     ports:
       - "8081:8081"
