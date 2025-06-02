@@ -6,7 +6,6 @@ public class TableColumnDataPOJO {
 	private Set<String> tableList;
 	private Set<Object> columnList;
 
-
 	public TableColumnDataPOJO(Set<String> tableList, Set<Object> columnList) {
 		this.tableList = tableList;
 		this.columnList = columnList;

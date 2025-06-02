@@ -1,8 +1,9 @@
 package com.tm.querybuilder.validation;
 
+import java.util.List;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.List;
 
 public class NoWhitespaceListValidator implements ConstraintValidator<NoWhitespaceList, List<String>> {
 	@Override

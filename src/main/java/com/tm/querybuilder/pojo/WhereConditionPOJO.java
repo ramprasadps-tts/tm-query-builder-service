@@ -6,7 +6,7 @@ import javax.validation.Valid;
 
 public class WhereConditionPOJO {
 
-	@Valid	
+	@Valid
 	private List<ConditionGroupPOJO> conditionData;
 
 	public List<ConditionGroupPOJO> getConditionData() {

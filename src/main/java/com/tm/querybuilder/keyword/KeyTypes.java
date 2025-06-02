@@ -12,7 +12,6 @@ import com.tm.querybuilder.pojo.FilterDataPOJO;
 import com.tm.querybuilder.pojo.OrderByPOJO;
 import com.tm.querybuilder.validation.EmptyNotNull;
 
-
 @Component
 public class KeyTypes {
 

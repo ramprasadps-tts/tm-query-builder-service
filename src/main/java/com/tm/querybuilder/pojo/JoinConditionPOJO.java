@@ -10,7 +10,7 @@ public class JoinConditionPOJO {
 
 	@NotBlank(message = "Enter the LeftColumn")
 	private String lsColumn;
-	
+
 	@NotNull(message = "Enter the Right column")
 	private String rsColumn;
 
@@ -23,7 +23,6 @@ public class JoinConditionPOJO {
 		return lsColumn;
 	}
 
-	
 	public Condition getCondition() {
 		return condition;
 	}
@@ -40,11 +39,9 @@ public class JoinConditionPOJO {
 		return rsColumn;
 	}
 
-
 	public void setRsColumn(String rsColumn) {
 		this.rsColumn = rsColumn;
 	}
-
 
 	public void setCondition(Condition condition) {
 		this.condition = condition;

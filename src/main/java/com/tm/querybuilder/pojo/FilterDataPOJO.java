@@ -1,6 +1,7 @@
 package com.tm.querybuilder.pojo;
 
 import java.util.List;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
@@ -87,6 +88,7 @@ public class FilterDataPOJO {
 	public void setJoinData(JoinsPOJO joinData) {
 		this.joinData = joinData;
 	}
+
 	public String getTableName() {
 		return tableName;
 	}
@@ -104,4 +106,3 @@ public class FilterDataPOJO {
 	}
 
 }
-

@@ -7,7 +7,7 @@ import javax.validation.Valid;
 public class JoinsPOJO {
 
 	private Boolean isPrimaryKey;
-	
+
 	@Valid
 	private List<JoinDataPOJO> join;
 
@@ -26,6 +26,5 @@ public class JoinsPOJO {
 	public void setIsPrimaryKey(Boolean isPrimaryKey) {
 		this.isPrimaryKey = isPrimaryKey;
 	}
-	
-	
+
 }

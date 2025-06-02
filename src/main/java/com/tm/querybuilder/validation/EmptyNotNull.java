@@ -1,7 +1,7 @@
 package com.tm.querybuilder.validation;
 
 public class EmptyNotNull {
-	 
+
 	private EmptyNotNull() {
 		super();
 	}

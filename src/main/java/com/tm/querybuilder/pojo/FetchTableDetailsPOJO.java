@@ -8,7 +8,6 @@ public class FetchTableDetailsPOJO {
 
 	List<ForeignKeysPOJO> foreignKeys;
 
-	
 	public String getPrimarykey() {
 		return primarykey;
 	}
@@ -24,7 +23,5 @@ public class FetchTableDetailsPOJO {
 	public void setForeignKeys(List<ForeignKeysPOJO> foreignKeys) {
 		this.foreignKeys = foreignKeys;
 	}
-	
-	
 
 }

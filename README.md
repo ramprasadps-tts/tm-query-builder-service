@@ -27,15 +27,15 @@ Clone the project and open it in Spring Tool Suite or your preferred IDE:
 ```bash
 git clone https://github.com/ramprasadps-tts/tm-query-builder-service
 ```
-## MySQL Setup
+### 2. MySQL Setup
 
 To run the application with MySQL, follow these steps:
 
-### 1. Start MySQL
+#### 1. Start MySQL
 
 Ensure MySQL server is running locally.
 
-### 2. Create Database and Table
+#### 2. Create Database and Table
 
 You can create the required database and table by executing the provided DDL script.
 
@@ -43,10 +43,18 @@ You can create the required database and table by executing the provided DDL scr
 
 [tm-query-builder-service-ddl.sql](https://github.com/ramprasadps-tts/tm-query-builder-service/blob/postgres-integration/tm-query-builder-service-ddl.sql)
 
-### 3. Execute the Script
+#### 3. Execute the Script
 
 Run the script using the MySQL command-line tool:
 
 ```bash
 mysql -u root -p < tm-query-builder-service-ddl.sql
+```
+---
+## Running the Application
+
+Run the application by passing sensitive properties as system properties:
+
+```bash
+java -Dspring.datasource.password=your_password -jar tm-query-builder-service.jar
 ```
