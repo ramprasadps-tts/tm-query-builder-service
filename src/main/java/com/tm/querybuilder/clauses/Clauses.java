@@ -32,7 +32,8 @@ public class Clauses {
 					.append(condition.fetchCondition(filterData.getWhereData().getConditionData(), datatype));
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while building WHERE condition.");
-			throw new DataAccessResourceFailureException("An error occurred while building WHERE condition.", exception);
+			throw new DataAccessResourceFailureException("An error occurred while building WHERE condition.",
+					exception);
 		}
 		LOGGER.debug("WHERE Conditions : {}", querBuilder);
 		return querBuilder.toString();
@@ -49,8 +50,8 @@ public class Clauses {
 						&& !CollectionUtils.isEmpty(joinData.getJoinCondition())) {
 					conditionBuilder.append("ON");
 					for (JoinConditionPOJO joinConditionDto : joinData.getJoinCondition()) {
-						conditionBuilder.append(" (").append(joinConditionDto.getLsColumn())
-								.append(" ").append(joinConditionDto.getCondition().getOperator()).append(" ")
+						conditionBuilder.append(" (").append(joinConditionDto.getLsColumn()).append(" ")
+								.append(joinConditionDto.getCondition().getOperator()).append(" ")
 								.append(joinConditionDto.getRsColumn()).append(")");
 						if (EmptyNotNull.isValidInput(joinConditionDto.getLogicalCondition())) {
 							conditionBuilder.append(" ").append(joinConditionDto.getLogicalCondition());
@@ -78,7 +79,8 @@ public class Clauses {
 			groupByBuilder.append(QueryConstants.GROUPBY).append(String.join(",", columnList));
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while building GROUP BY clause.");
-			throw new DataAccessResourceFailureException("An error occurred while building GROUP BY clause.", exception);
+			throw new DataAccessResourceFailureException("An error occurred while building GROUP BY clause.",
+					exception);
 		}
 		return groupByBuilder.toString();
 	}
@@ -87,17 +89,16 @@ public class Clauses {
 	 * Build the HAVING clause using aggregates
 	 *
 	 * @param conditionGroup the HAVING conditions
-	 * @param datatype the column data types
-	 * @param aggregates the aggregate functions used in SELECT
+	 * @param datatype       the column data types
+	 * @param aggregates     the aggregate functions used in SELECT
 	 * @return a valid HAVING clause
 	 */
 	public String having(List<ConditionGroupPOJO> conditionGroup, Map<String, Object> datatype,
-						 List<AggregateFunctionPOJO> aggregates) {
+			List<AggregateFunctionPOJO> aggregates) {
 		ConditionBuilder condition = new ConditionBuilder(aggregates); // Pass aggregate functions
 		StringBuilder havingBuilder = new StringBuilder();
 		try {
-			havingBuilder.append(QueryConstants.HAVING)
-					.append(condition.fetchCondition(conditionGroup, datatype));
+			havingBuilder.append(QueryConstants.HAVING).append(condition.fetchCondition(conditionGroup, datatype));
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while building HAVING clause.");
 			throw new DataAccessResourceFailureException("An error occurred while building HAVING clause.", exception);
@@ -105,4 +106,3 @@ public class Clauses {
 		return havingBuilder.toString();
 	}
 }
-

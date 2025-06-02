@@ -8,7 +8,7 @@ import com.tm.querybuilder.enums.LogicalCondition;
 
 public class ConditionGroupPOJO {
 
-    @Valid
+	@Valid
 	private List<ConditionPOJO> conditionList;
 	private LogicalCondition logicalCondition;
 

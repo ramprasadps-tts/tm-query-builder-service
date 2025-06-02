@@ -4,6 +4,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class ObjectNoWhiteSpaceValidator implements ConstraintValidator<ObjectNoWhiteSpace, Object> {
+
 	@Override
 	public void initialize(ObjectNoWhiteSpace constraintAnnotation) {
 		// Initialization, if needed
@@ -15,6 +16,7 @@ public class ObjectNoWhiteSpaceValidator implements ConstraintValidator<ObjectNo
 			return true; // Null values are considered valid
 		}
 
-		return value.toString().trim().length() > 0; // Validate white space
+		String trimmed = value.toString().trim();
+		return !trimmed.isEmpty();// Validate white space
 	}
 }

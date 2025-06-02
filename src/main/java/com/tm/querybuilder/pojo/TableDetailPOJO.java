@@ -8,7 +8,7 @@ public class TableDetailPOJO {
 	Map<String, String> column;
 
 	private String primarykey;
-	
+
 	List<ForeignKeysPOJO> foreignKeys;
 
 	public Map<String, String> getColumn() {
@@ -34,9 +34,5 @@ public class TableDetailPOJO {
 	public void setForeignKeys(List<ForeignKeysPOJO> foreignKeys) {
 		this.foreignKeys = foreignKeys;
 	}
-	
-	
-	
-	
-	
+
 }

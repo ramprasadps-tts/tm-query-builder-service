@@ -6,7 +6,7 @@ public class MessageConstants {
 	}
 
 	public static final String FROM = " FROM ";
-	public static final String POSTGRES="postgresql";
+	public static final String POSTGRES = "postgresql";
 	public static final String COLUMN_NAME = "column_name";
 	public static final String DATA_TYPE = "data_type";
 	public static final String TABLE_NAME = "tableName";
@@ -21,6 +21,6 @@ public class MessageConstants {
 	public static final String NOT_VALID_TABLECOLUMN = "Not a valid Table or Column";
 	public static final String SCHEMA_IS_VALID = "Schema is valid :";
 	public static final String VALID_TABLECOLUMN = "Table and column are  valid one.";
-	public static final String NOT_VALID_CONNECTION="Not Valid connection";
+	public static final String NOT_VALID_CONNECTION = "Not Valid connection";
 
 }

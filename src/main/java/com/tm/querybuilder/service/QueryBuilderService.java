@@ -57,8 +57,7 @@ public interface QueryBuilderService {
 	public Boolean joinConditionValidator(FilterDataPOJO filterData, String connectionId);
 
 	public String getDatabaseConnection(DbConnectionRequestPOJO dbConnectionRequestPojo);
-	
+
 	public boolean isValidConnection(String connectionId);
 
 }
-

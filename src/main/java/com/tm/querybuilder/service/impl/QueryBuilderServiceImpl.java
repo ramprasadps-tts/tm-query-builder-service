@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -28,6 +27,11 @@ import com.tm.querybuilder.dto.CountRowDTO;
 import com.tm.querybuilder.dto.FetchTableDetailsDTO;
 import com.tm.querybuilder.enums.KeyColumn;
 import com.tm.querybuilder.keyword.KeyTypes;
+import com.tm.querybuilder.pojo.AggregateFunctionPOJO;
+import com.tm.querybuilder.pojo.ConditionGroupPOJO;
+import com.tm.querybuilder.pojo.ConditionPOJO;
+import com.tm.querybuilder.pojo.DatabaseConnectionDTO;
+import com.tm.querybuilder.pojo.FetchTableDetailsPOJO;
 import com.tm.querybuilder.pojo.FilterDataPOJO;
 import com.tm.querybuilder.pojo.ForeignKeysPOJO;
 import com.tm.querybuilder.pojo.JoinConditionPOJO;
@@ -35,11 +39,6 @@ import com.tm.querybuilder.pojo.JoinDataPOJO;
 import com.tm.querybuilder.pojo.JoinsPOJO;
 import com.tm.querybuilder.pojo.OrderByPOJO;
 import com.tm.querybuilder.pojo.request.DbConnectionRequestPOJO;
-import com.tm.querybuilder.pojo.AggregateFunctionPOJO;
-import com.tm.querybuilder.pojo.ConditionGroupPOJO;
-import com.tm.querybuilder.pojo.ConditionPOJO;
-import com.tm.querybuilder.pojo.DatabaseConnectionDTO;
-import com.tm.querybuilder.pojo.FetchTableDetailsPOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
 import com.tm.querybuilder.validation.EmptyNotNull;
 
@@ -52,8 +51,11 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Value("${querybuilder.offset}")
 	private int offset;
 
-	@Autowired
-	private QueryBuilderDao queryBuilderDao;
+	private final QueryBuilderDao queryBuilderDao;
+
+	public QueryBuilderServiceImpl(QueryBuilderDao queryBuilderDao) {
+		this.queryBuilderDao = queryBuilderDao;
+	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilderServiceImpl.class);
 
@@ -62,22 +64,20 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @return This method will check the schema name and table exist in dao.
 	 * 
 	 */
-	//Check if the schema exists for the given connectionId.
+	// Check if the schema exists for the given connectionId.
 	@Override
 	public Boolean isSchemaExist(String connectionId) {
 		LOGGER.info("Schema Exist service Method");
 		boolean isSchemaExist = false;
 		try {
 			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
-			String p=MessageConstants.POSTGRES;
+			String p = MessageConstants.POSTGRES;
 			if (p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver())) {
 				isSchemaExist = queryBuilderDao.isSchemaExist(databaseConnectionDTO.getConnectionSchemaname(),
 						databaseConnectionDTO);
-			}
-			else
-			{
-			isSchemaExist = queryBuilderDao.isSchemaExist(databaseConnectionDTO.getConnectionDb(),
-					databaseConnectionDTO);
+			} else {
+				isSchemaExist = queryBuilderDao.isSchemaExist(databaseConnectionDTO.getConnectionDb(),
+						databaseConnectionDTO);
 			}
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while checking is Schema Exist in service.");
@@ -93,7 +93,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @param tableName
 	 * @return This method will check the schema and table and column in dao.
 	 */
-	 //Validate whether the specified table and joined tables exist.
+	// Validate whether the specified table and joined tables exist.
 	@Override
 	public Boolean isValidTable(String tableString, JoinsPOJO joinsPOJO, String connectionId) {
 		LOGGER.info("isValid table service");
@@ -108,17 +108,14 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			}
 			tablesList.add(tableString);
 			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
-			String p=MessageConstants.POSTGRES;
+			String p = MessageConstants.POSTGRES;
 			// Validate table existence depending on DB driver
-			if(p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver()))
-			{
+			if (p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver())) {
 				isValidTable = queryBuilderDao.isValidTable(databaseConnectionDTO.getConnectionSchemaname(), tablesList,
 						databaseConnectionDTO);
-			}
-			else
-			{
-			isValidTable = queryBuilderDao.isValidTable(databaseConnectionDTO.getConnectionDb(), tablesList,
-					databaseConnectionDTO);
+			} else {
+				isValidTable = queryBuilderDao.isValidTable(databaseConnectionDTO.getConnectionDb(), tablesList,
+						databaseConnectionDTO);
 			}
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while checking is valid Table in service.");
@@ -140,13 +137,11 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		List<ColumnDetailsDTO> columnDetailsList;
 		try {
 			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
-			String p=MessageConstants.POSTGRES;
+			String p = MessageConstants.POSTGRES;
 			if (p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver())) {
 				columnDetailsList = queryBuilderDao.fetchColumnDetails(databaseConnectionDTO.getConnectionSchemaname(),
 						databaseConnectionDTO);
-			}
-			else
-			{
+			} else {
 				columnDetailsList = queryBuilderDao.fetchColumnDetails(databaseConnectionDTO.getConnectionDb(),
 						databaseConnectionDTO);
 			}
@@ -165,8 +160,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @return List<Map<String, Object>> By getting string as query in parameter
 	 *         based on the query in will execute.
 	 */
-	 
-	//Executes a count query and returns row count results.
+
+	// Executes a count query and returns row count results.
 	private List<CountRowDTO> fetchCountQuery(String connectionId, String countqueryString) {
 		LOGGER.info("fetch Result Data service");
 		List<CountRowDTO> countQuery;
@@ -218,105 +213,103 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		Map<String, String> queryMap = new HashMap<>();
 		KeyTypes keyTypes = new KeyTypes();
 		LOGGER.info("fetch query service");
-		StringBuilder querBuilder = new StringBuilder();
-		StringBuilder selectBuilder = new StringBuilder();
-		try {
-			//SELECT 
-			selectBuilder.append(QueryConstants.SELECT);
-			// Handle different combinations of column selection and aggregates
-			if (EmptyNotNull.isValidInput(filterData.getGroupBy())
-					&& !CollectionUtils.isEmpty(filterData.getColumnNames())
-					&& !CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
-				selectBuilder.append(String.join(",", filterData.getColumnNames()));
-				for (AggregateFunctionPOJO aggregateFunctionPOJO : filterData.getAggregateFunction()) {
-					selectBuilder.append(", ") 
-						.append(aggregateFunctionPOJO.getAggregateTypes()).append("(")
-						.append(aggregateFunctionPOJO.getColumnName()).append(")");
-				}
 
-			} else if (!CollectionUtils.isEmpty(filterData.getColumnNames())) {
-				selectBuilder.append(String.join(",", filterData.getColumnNames()));
-			} else if (!CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
-				for (AggregateFunctionPOJO aggregateFunctionPOJO : filterData.getAggregateFunction()) {
-					selectBuilder.append(aggregateFunctionPOJO.getAggregateTypes()).append("(")
-							.append(aggregateFunctionPOJO.getColumnName()).append(")");
-				}
-			} else {
-				LOGGER.error("** Both the column list and aggregate function are empty **");
-				throw new DataAccessResourceFailureException("Both the column List and aggregate function are empty");
+		StringBuilder queryBuilder = new StringBuilder();
+		StringBuilder selectBuilder = new StringBuilder();
+
+		try {
+			// SELECT clause
+			selectBuilder.append(QueryConstants.SELECT);
+			buildSelectClause(selectBuilder, filterData);
+
+			// FROM clause
+			DatabaseConnectionDTO dbConnection = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			String dbDriver = dbConnection.getConnectionDriver();
+			String schemaOrDb = dbDriver.equalsIgnoreCase(MessageConstants.POSTGRES)
+					? dbConnection.getConnectionSchemaname()
+					: dbConnection.getConnectionDb();
+
+			queryBuilder.append(QueryConstants.FROM).append(schemaOrDb).append(".").append(filterData.getTableName());
+
+			// WHERE / JOIN / GROUP BY / HAVING
+			String conditionalQuery = ifQueryBuilder(filterData, schemaOrDb, connectionId);
+			if (EmptyNotNull.isValidInput(conditionalQuery)) {
+				queryBuilder.append(conditionalQuery);
 			}
-			// FROM 
-			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
-			String p=MessageConstants.POSTGRES;
-			if(p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver()))
-			{
-				querBuilder.append(QueryConstants.FROM).append(databaseConnectionDTO.getConnectionSchemaname()).append(".")
-				.append(filterData.getTableName());
-			}
-			else
-			{
-			querBuilder.append(QueryConstants.FROM).append(databaseConnectionDTO.getConnectionDb()).append(".")
-					.append(filterData.getTableName());
-			}
-			// Append WHERE, JOIN, GROUP BY, HAVING
-			String ifQueryPresent;
-			if(p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver()))
-			{
-				ifQueryPresent = ifQueryBuilder(filterData, databaseConnectionDTO.getConnectionSchemaname(), connectionId);
-			}
-			else
-			{
-			     ifQueryPresent = ifQueryBuilder(filterData, databaseConnectionDTO.getConnectionDb(), connectionId);
-			}
-			if (EmptyNotNull.isValidInput(ifQueryPresent)) {
-				querBuilder.append(ifQueryPresent);
-			}
+
 			// ORDER BY
 			if (EmptyNotNull.isValidInput(filterData.getOrderBy())) {
-				querBuilder.append(keyTypes.getColumnOrderBy(filterData.getOrderBy()));
+				queryBuilder.append(keyTypes.getColumnOrderBy(filterData.getOrderBy()));
 			}
+
 			// LIMIT and OFFSET
-			querBuilder.append(keyTypes.getLimit(filterData, limit, offset));
+			queryBuilder.append(keyTypes.getLimit(filterData, limit, offset));
+
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while fetch Query.");
 			throw new DataAccessResourceFailureException("An error occurred while fetch Query.", exception);
 		}
-		queryMap.put("selectQuery", selectBuilder.append(querBuilder).toString());
-		StringBuilder countBuilder = new StringBuilder();
-		
-		countBuilder.append(QueryConstants.SELECT_COUNT);
-		countBuilder.append(QueryConstants.FROM);
-		countBuilder.append("( ");
-		countBuilder.append(selectBuilder);
-		countBuilder.append(") AS count");
-		queryMap.put("countQuery", countBuilder.toString());
-		LOGGER.debug("Build Query for the request data service:{}", querBuilder);
+
+		// Final query assembly
+		queryMap.put("selectQuery", selectBuilder.append(queryBuilder).toString());
+		queryMap.put("countQuery", buildCountQuery(selectBuilder.toString()));
+
+		LOGGER.debug("Build Query for the request data service:{}", queryBuilder);
 		return queryMap;
 	}
+
+	private void buildSelectClause(StringBuilder selectBuilder, FilterDataPOJO filterData) {
+		if (EmptyNotNull.isValidInput(filterData.getGroupBy()) && !CollectionUtils.isEmpty(filterData.getColumnNames())
+				&& !CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
+
+			selectBuilder.append(String.join(",", filterData.getColumnNames()));
+
+			for (AggregateFunctionPOJO aggregate : filterData.getAggregateFunction()) {
+				selectBuilder.append(", ").append(aggregate.getAggregateTypes()).append("(")
+						.append(aggregate.getColumnName()).append(")");
+			}
+
+		} else if (!CollectionUtils.isEmpty(filterData.getColumnNames())) {
+			selectBuilder.append(String.join(",", filterData.getColumnNames()));
+
+		} else if (!CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
+			for (AggregateFunctionPOJO aggregate : filterData.getAggregateFunction()) {
+				selectBuilder.append(aggregate.getAggregateTypes()).append("(").append(aggregate.getColumnName())
+						.append(")");
+			}
+
+		} else {
+			LOGGER.error("** Both the column list and aggregate function are empty **");
+			throw new DataAccessResourceFailureException("Both the column List and aggregate function are empty");
+		}
+	}
+
+	private String buildCountQuery(String selectQuery) {
+		return new StringBuilder().append(QueryConstants.SELECT_COUNT).append(QueryConstants.FROM).append("( ")
+				.append(selectQuery).append(") AS count").toString();
+	}
+
 	private String ifQueryBuilder(FilterDataPOJO filterData, String schemaString, String connectionId) {
 		StringBuilder querBuilder = new StringBuilder();
 		Clauses clauses = new Clauses();
 		try {
-			//JOIN
+			// JOIN
 			if (EmptyNotNull.isValidInput(filterData.getJoinData())) {
 				querBuilder.append(clauses.getOnCondition(filterData.getJoinData().getJoin(), schemaString));
 			}
-			//WHERE
+			// WHERE
 			if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
 				querBuilder.append(
-					clauses.whereCondition(filterData, getDataType(filterData, schemaString, connectionId)));
+						clauses.whereCondition(filterData, getDataType(filterData, schemaString, connectionId)));
 			}
-			//GROUPBY
+			// GROUPBY
 			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
 				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getColumnList())) {
 					querBuilder.append(clauses.groupBy(filterData.getGroupBy(), filterData.getColumnNames()));
 				}
 				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getConditionData())) {
-					querBuilder.append(clauses.having(
-						filterData.getGroupBy().getConditionData(),
-						getDataType(filterData, schemaString, connectionId),
-						filterData.getAggregateFunction() 
-					));
+					querBuilder.append(clauses.having(filterData.getGroupBy().getConditionData(),
+							getDataType(filterData, schemaString, connectionId), filterData.getAggregateFunction()));
 				}
 			}
 		} catch (Exception exception) {
@@ -377,64 +370,108 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	public Boolean isValidColumns(FilterDataPOJO filterData, String connectionId) {
 		LOGGER.info("Is Valid TableDetailPOJO service method");
 		boolean isValidColumn = false;
+
 		try {
-			Set<String> tablesList = new HashSet<>();
-			Set<String> columnsList = new HashSet<>();
-			if (EmptyNotNull.isValidInput(filterData.getJoinData())) {
-				for (JoinDataPOJO joinTable : filterData.getJoinData().getJoin()) {
-					tablesList.add(joinTable.getJoinTableName());
-					if (!CollectionUtils.isEmpty(joinTable.getJoinCondition())) {
-						for (JoinConditionPOJO joinConditionDto : joinTable.getJoinCondition()) {
-							columnsList.add(joinConditionDto.getLsColumn());
-							columnsList.add(joinConditionDto.getRsColumn());
-						}
-					}
-				}
-			}
-			if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
-				columnsList.addAll(fetchConditionColumn(filterData.getWhereData().getConditionData()));
-			}
-			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
-				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getColumnList())) {
-					columnsList.addAll(filterData.getGroupBy().getColumnList());
-				}
-				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getConditionData())) {
-					columnsList.addAll(fetchConditionColumn(filterData.getGroupBy().getConditionData()));
-				}
-			}
-			if (!CollectionUtils.isEmpty(filterData.getOrderBy())) {
-				for (OrderByPOJO orderByPOJO : filterData.getOrderBy()) {
-					columnsList.add(orderByPOJO.getOrderColumnName());
-				}
-			}
-			if (!CollectionUtils.isEmpty(filterData.getColumnNames())) {
-				columnsList.addAll(filterData.getColumnNames());
-			}
-			if (!CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
-				for (AggregateFunctionPOJO aggregateFunction : filterData.getAggregateFunction()) {
-					columnsList.add(aggregateFunction.getColumnName());
-				}
-			}
+			Set<String> tablesList = extractTables(filterData);
+			Set<String> columnsList = extractColumns(filterData);
+
 			tablesList.add(filterData.getTableName());
-			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
-			String p=MessageConstants.POSTGRES;
-			if(p.equalsIgnoreCase(databaseConnectionDTO.getConnectionDriver()))
-			{
-				isValidColumn = queryBuilderDao.isValidColumns(columnsList, tablesList,
-						databaseConnectionDTO.getConnectionSchemaname(), databaseConnectionDTO);
-			}
-			else
-			{
-			isValidColumn = queryBuilderDao.isValidColumns(columnsList, tablesList,
-					databaseConnectionDTO.getConnectionDb(), databaseConnectionDTO);
-			}
+
+			DatabaseConnectionDTO dbConnection = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			String driver = dbConnection.getConnectionDriver();
+			String schemaOrDb = driver.equalsIgnoreCase(MessageConstants.POSTGRES)
+					? dbConnection.getConnectionSchemaname()
+					: dbConnection.getConnectionDb();
+
+			isValidColumn = queryBuilderDao.isValidColumns(columnsList, tablesList, schemaOrDb, dbConnection);
+
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred Checking is valid Column details.");
 			throw new DataAccessResourceFailureException("An error occurred Checking is valid Column Details",
 					exception);
 		}
+
 		LOGGER.debug("is valid column in service layer:{}", isValidColumn);
 		return isValidColumn;
+	}
+
+	private Set<String> extractTables(FilterDataPOJO filterData) {
+		Set<String> tables = new HashSet<>();
+		if (EmptyNotNull.isValidInput(filterData.getJoinData())) {
+			for (JoinDataPOJO join : filterData.getJoinData().getJoin()) {
+				tables.add(join.getJoinTableName());
+			}
+		}
+		return tables;
+	}
+
+	private Set<String> extractColumns(FilterDataPOJO filterData) {
+		Set<String> columns = new HashSet<>();
+
+		extractJoinColumns(filterData, columns);
+		extractWhereColumns(filterData, columns);
+		extractGroupByColumns(filterData, columns);
+		extractOrderByColumns(filterData, columns);
+		extractSelectColumns(filterData, columns);
+		extractAggregateColumns(filterData, columns);
+
+		return columns;
+	}
+
+	private void extractJoinColumns(FilterDataPOJO filterData, Set<String> columns) {
+		if (!EmptyNotNull.isValidInput(filterData.getJoinData()))
+			return;
+
+		for (JoinDataPOJO joinTable : filterData.getJoinData().getJoin()) {
+			if (CollectionUtils.isEmpty(joinTable.getJoinCondition()))
+				continue;
+
+			for (JoinConditionPOJO joinCondition : joinTable.getJoinCondition()) {
+				columns.add(joinCondition.getLsColumn());
+				columns.add(joinCondition.getRsColumn());
+			}
+		}
+	}
+
+	private void extractWhereColumns(FilterDataPOJO filterData, Set<String> columns) {
+		if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
+			columns.addAll(fetchConditionColumn(filterData.getWhereData().getConditionData()));
+		}
+	}
+
+	private void extractGroupByColumns(FilterDataPOJO filterData, Set<String> columns) {
+		if (!EmptyNotNull.isValidInput(filterData.getGroupBy()))
+			return;
+
+		if (!CollectionUtils.isEmpty(filterData.getGroupBy().getColumnList())) {
+			columns.addAll(filterData.getGroupBy().getColumnList());
+		}
+
+		if (!CollectionUtils.isEmpty(filterData.getGroupBy().getConditionData())) {
+			columns.addAll(fetchConditionColumn(filterData.getGroupBy().getConditionData()));
+		}
+	}
+
+	private void extractOrderByColumns(FilterDataPOJO filterData, Set<String> columns) {
+		if (!CollectionUtils.isEmpty(filterData.getOrderBy())) {
+			for (OrderByPOJO orderBy : filterData.getOrderBy()) {
+				columns.add(orderBy.getOrderColumnName());
+			}
+		}
+	}
+
+	private void extractSelectColumns(FilterDataPOJO filterData, Set<String> columns) {
+		if (!CollectionUtils.isEmpty(filterData.getColumnNames())) {
+			columns.addAll(filterData.getColumnNames());
+		}
+	}
+
+	private void extractAggregateColumns(FilterDataPOJO filterData, Set<String> columns) {
+		if (!CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
+			for (AggregateFunctionPOJO aggregate : filterData.getAggregateFunction()) {
+				columns.add(aggregate.getColumnName());
+			}
+		}
 	}
 
 	private Map<String, FetchTableDetailsPOJO> fetchTableDetails(FilterDataPOJO filterDataPOJO, String connectionId) {
@@ -496,31 +533,28 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	private Boolean conditionValidator(FilterDataPOJO filterData, Map<String, FetchTableDetailsPOJO> tableDetails) {
 		LOGGER.info("build On condition using string builder method");
 		boolean isValid = true;
+
 		try {
 			for (JoinDataPOJO joinData : filterData.getJoinData().getJoin()) {
-				if (!CollectionUtils.isEmpty(joinData.getJoinCondition())) {
-					for (JoinConditionPOJO joinConditionDto : joinData.getJoinCondition()) {
+				if (CollectionUtils.isEmpty(joinData.getJoinCondition()))
+					continue;
 
-						FetchTableDetailsPOJO leftTableString = tableDetails.get(filterData.getTableName());
-						FetchTableDetailsPOJO rightTableString = tableDetails.get(joinData.getJoinTableName());
-						if (leftTableString.getPrimarykey().equals(joinConditionDto.getLsColumn())
-								&& rightTableString.getPrimarykey().equals(joinConditionDto.getRsColumn())) {
-							isValid = false;
-						} else {
-							boolean isPrimary = false;
-							boolean isForeign = false;
-							isPrimary = leftTableString.getPrimarykey().equals(joinConditionDto.getLsColumn())
-									|| rightTableString.getPrimarykey().equals(joinConditionDto.getRsColumn());
-							if (!CollectionUtils.isEmpty(leftTableString.getForeignKeys())) {
-								isForeign = getKeyIteration(leftTableString.getForeignKeys(),
-										joinData.getJoinTableName(), joinConditionDto.getLsColumn());
-							}
-							if (!CollectionUtils.isEmpty(rightTableString.getForeignKeys())) {
-								isForeign = getKeyIteration(rightTableString.getForeignKeys(),
-										filterData.getTableName(), joinConditionDto.getRsColumn());
-							}
-							isValid = Boolean.TRUE.equals(isPrimary) && Boolean.TRUE.equals(isForeign);
-						}
+				for (JoinConditionPOJO joinConditionDto : joinData.getJoinCondition()) {
+					FetchTableDetailsPOJO leftTable = tableDetails.get(filterData.getTableName());
+					FetchTableDetailsPOJO rightTable = tableDetails.get(joinData.getJoinTableName());
+
+					String leftColumn = joinConditionDto.getLsColumn();
+					String rightColumn = joinConditionDto.getRsColumn();
+
+					if (leftTable.getPrimarykey().equals(leftColumn)
+							&& rightTable.getPrimarykey().equals(rightColumn)) {
+						isValid = false;
+					} else {
+						boolean isPrimary = isPrimaryKeyMatch(leftTable, rightTable, leftColumn, rightColumn);
+						boolean isForeign = isForeignKeyMatch(leftTable, rightTable, leftColumn, rightColumn,
+								filterData.getTableName(), joinData.getJoinTableName());
+
+						isValid = isPrimary && isForeign;
 					}
 				}
 			}
@@ -529,8 +563,30 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			throw new DataAccessResourceFailureException("An error occurred while getting Join condition query.",
 					exception);
 		}
+
 		LOGGER.debug("conditionValidator in service layer: {}", isValid);
 		return isValid;
+	}
+
+	private boolean isPrimaryKeyMatch(FetchTableDetailsPOJO leftTable, FetchTableDetailsPOJO rightTable,
+			String leftColumn, String rightColumn) {
+		return leftTable.getPrimarykey().equals(leftColumn) || rightTable.getPrimarykey().equals(rightColumn);
+	}
+
+	private boolean isForeignKeyMatch(FetchTableDetailsPOJO leftTable, FetchTableDetailsPOJO rightTable,
+			String leftColumn, String rightColumn, String leftTableName, String rightTableName) {
+
+		boolean isForeign = false;
+
+		if (!CollectionUtils.isEmpty(leftTable.getForeignKeys())) {
+			isForeign = getKeyIteration(leftTable.getForeignKeys(), rightTableName, leftColumn);
+		}
+
+		if (!CollectionUtils.isEmpty(rightTable.getForeignKeys())) {
+			isForeign = isForeign || getKeyIteration(rightTable.getForeignKeys(), leftTableName, rightColumn);
+		}
+
+		return isForeign;
 	}
 
 	private Set<String> fetchConditionColumn(List<ConditionGroupPOJO> conditionGroupPOJO) {
@@ -599,4 +655,3 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return isValid;
 	}
 }
-

@@ -6,7 +6,7 @@ public class SchemaRequestPOJO {
 
 	@NotBlank(message = "Enter Connection Id")
 	private String connectionId;
-	
+
 	public String getConnectionId() {
 		return connectionId;
 	}
@@ -15,6 +15,4 @@ public class SchemaRequestPOJO {
 		this.connectionId = connectionId;
 	}
 
-	
 }
-

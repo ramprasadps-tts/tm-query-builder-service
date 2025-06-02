@@ -2,10 +2,9 @@ package com.tm.querybuilder.dto;
 
 public class ColumnDatatypeDTO {
 
-	
-	 String dataType;
-	 String tableColumn;
-	 
+	String dataType;
+	String tableColumn;
+
 	public String getDataType() {
 		return dataType;
 	}
@@ -21,8 +20,5 @@ public class ColumnDatatypeDTO {
 	public void setTableColumn(String tableColumn) {
 		this.tableColumn = tableColumn;
 	}
-	
-	
 
-	
 }
